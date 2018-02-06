@@ -10,10 +10,22 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
     
-    var itemArray = ["Find Mike", "Buy Eggos", "Destro demogorgon"]
+    var itemArray: [String] = []
+    var defaults = UserDefaults.standard
 
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        if let items : [String] = defaults.stringArray(forKey: "itemArray"){
+            itemArray = items
+        } else{
+            itemArray = []
+            print("unable to find items array")
+        }
+        
+        
+        
         // Do any additional setup after loading the view, typically from a nib.
     }
 
@@ -31,6 +43,7 @@ class TodoListViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
         
         cell.textLabel?.text = itemArray[indexPath.row]
+        
         
         return cell
     }
@@ -55,6 +68,7 @@ class TodoListViewController: UITableViewController {
                 return
             }
             self.itemArray.append(textFieldValue)
+            self.defaults.setValue(self.itemArray, forKeyPath: "itemArray")
             self.tableView.reloadData()
         }
         alert.addTextField { (textField) in
