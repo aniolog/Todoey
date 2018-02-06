@@ -10,14 +10,14 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
     
-    var itemArray: [String] = []
+    var itemArray: [Item] = []
     var defaults = UserDefaults.standard
 
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let items : [String] = defaults.stringArray(forKey: "itemArray"){
+        if let items : [Item] = defaults.array(forKey: "itemArray") as! [Item]!{
             itemArray = items
         } else{
             itemArray = []
@@ -41,8 +41,10 @@ class TodoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
+        let item = itemArray[indexPath.row]
         
-        cell.textLabel?.text = itemArray[indexPath.row]
+        cell.textLabel?.text = item.title
+        cell.accessoryType = item.done == true ? .checkmark : .none
         
         
         return cell
@@ -50,12 +52,9 @@ class TodoListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         //print(itemArray[indexPath.row])
-        if (tableView.cellForRow(at: indexPath)?.accessoryType != .checkmark){
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }else{
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        }
-        
+        let item = itemArray[indexPath.row]
+        item.done = !(item.done)
+        tableView.reloadData()
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
@@ -67,8 +66,9 @@ class TodoListViewController: UITableViewController {
                 print("unable to assign value")
                 return
             }
-            self.itemArray.append(textFieldValue)
-            self.defaults.setValue(self.itemArray, forKeyPath: "itemArray")
+            
+            self.itemArray.append(Item(title: textFieldValue, done: false))
+            self.defaults.set(self.itemArray, forKey: "itemArray")
             self.tableView.reloadData()
         }
         alert.addTextField { (textField) in
@@ -78,6 +78,10 @@ class TodoListViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
         
         
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(true)
     }
     
 }
